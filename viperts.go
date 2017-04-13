@@ -47,8 +47,8 @@ func ReadInConfig() error {
                 return errors.New("config path not valid")
         }
 
-	mtx.Lock()
 	byteVal, err := ioutil.ReadFile(cfgFilePath)
+	mtx.Lock()
 	cfgContents = string(byteVal)
 	mtx.Unlock()
 	return err
