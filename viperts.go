@@ -48,9 +48,12 @@ func ReadInConfig() error {
         }
 
 	byteVal, err := ioutil.ReadFile(cfgFilePath)
+	if err != nil {
+		return err
+	}
 	tmpByteVal := string(byteVal)
 	UpdateConfig(&tmpByteVal)
-	return err
+	return nil
 }
 
 var config unsafe.Pointer // actual type is *Config
@@ -76,8 +79,11 @@ func ReadRemoteConfig() error {
 	}
 
 	data, err := consulGet( client, consulKey )
+	if err != nil {
+		return err
+	}
 	UpdateConfig(&data)
-	return err
+	return nil
 }
 
 func GetStringSlice(k string) []string {
