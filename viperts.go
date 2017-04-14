@@ -64,7 +64,6 @@ func CurrentConfig() *string { return (*string)(atomic.LoadPointer(&config)) }
 func UpdateConfig(cfg *string) { atomic.StorePointer(&config, unsafe.Pointer(cfg)) }
 
 // SetRemoteProvider t is type, currently unused, addr is consul address, keyPref is our configuration key
-// (typically servicename/config, a la encrypt/config, guid/config, etc.)
 func SetRemoteProvider(t string, addr string, keyPref string) {
 	consulAddr = addr
 	consulKey = keyPref
