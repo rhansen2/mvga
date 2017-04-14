@@ -56,7 +56,8 @@ func ReadInConfig() error {
 	return nil
 }
 
-var config unsafe.Pointer // actual type is *Config
+var config unsafe.Pointer // actual type is *string
+
 // CurrentConfig atomically returns the current configuration
 func CurrentConfig() *string { return (*string)(atomic.LoadPointer(&config)) }
 
