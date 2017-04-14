@@ -1,20 +1,19 @@
 package viper
 
-
 import (
 	"fmt"
-	"time"
 	"testing"
+	"time"
 )
 
-func intTest(t * testing.T) {
+func intTest(t *testing.T) {
 	val := GetInt("test_int")
 	exp := 5
 	if val != exp {
 		t.Fatalf("test_int was [%v], expected [%v]", val, exp)
 	}
 }
-func boolTest(t * testing.T) {
+func boolTest(t *testing.T) {
 	val := GetBool("test_bool")
 	exp := false
 	if val != exp {
@@ -22,7 +21,7 @@ func boolTest(t * testing.T) {
 	}
 }
 
-func stringTest(t * testing.T) {
+func stringTest(t *testing.T) {
 	val := GetString("test_string")
 	exp := "zaphod"
 	if val != exp {
@@ -30,7 +29,7 @@ func stringTest(t * testing.T) {
 	}
 }
 
-func stringSliceTest(t * testing.T) {
+func stringSliceTest(t *testing.T) {
 	val := GetStringSlice("test_string_slice")
 	t.Logf("%v", val)
 	if val[0] != "foo" {
@@ -44,14 +43,14 @@ func stringSliceTest(t * testing.T) {
 	}
 }
 
-func assertData(t * testing.T) {
+func assertData(t *testing.T) {
 	stringTest(t)
 	boolTest(t)
 	intTest(t)
 	stringSliceTest(t)
 }
 
-func TestJSONConfig(t * testing.T) {
+func TestJSONConfig(t *testing.T) {
 	SetConfigFile("test.json")
 	err := ReadInConfig()
 	if err != nil {
@@ -62,7 +61,7 @@ func TestJSONConfig(t * testing.T) {
 	assertData(t)
 }
 
-func TestConsulConfig(t * testing.T) {
+func TestConsulConfig(t *testing.T) {
 	SetConfigType("json") // basically unused now
 	SetRemoteProvider("consul", "127.0.0.1:8500", "test/config")
 	// Test watcher
@@ -74,17 +73,17 @@ func TestConsulConfig(t * testing.T) {
 	go func() {
 		for {
 			select {
-				case err := <-watcherChan:
-					  if err != nil {
-						  fmt.Println("error:")
-						  fmt.Println(err)
-					  } else {
-						  fmt.Println("config should be reloaded now?")
-						  assertData(t)
-					  }
-				case <-time.After(time.Second * 4):
-					//close(watcherChan)
-					return
+			case err := <-watcherChan:
+				if err != nil {
+					fmt.Println("error:")
+					fmt.Println(err)
+				} else {
+					fmt.Println("config should be reloaded now?")
+					assertData(t)
+				}
+			case <-time.After(time.Second * 4):
+				//close(watcherChan)
+				return
 			}
 		}
 	}()

@@ -4,14 +4,14 @@
 package viper
 
 import (
-	"os"
 	"errors"
-	"io/ioutil"
-	"github.com/tidwall/gjson"
 	"github.com/hashicorp/consul/api"
+	"github.com/tidwall/gjson"
+	"io/ioutil"
+	"os"
 
-	"unsafe"
 	"sync/atomic"
+	"unsafe"
 )
 
 // ErrNilReadFromConsul is for when determing when consul has read an unset key
@@ -21,7 +21,7 @@ var ErrNilReadFromConsul = errors.New("nil was read")
 //var mtx sync.Mutex
 var cfgType string
 var cfgFilePath string
-var cfgContents * string
+var cfgContents *string
 
 var consulAddr string
 var consulKey string
@@ -43,9 +43,9 @@ func SetConfigFile(f string) {
 }
 
 func ReadInConfig() error {
-        if _, err := os.Stat(cfgFilePath); err != nil {
-                return errors.New("config path not valid")
-        }
+	if _, err := os.Stat(cfgFilePath); err != nil {
+		return errors.New("config path not valid")
+	}
 
 	byteVal, err := ioutil.ReadFile(cfgFilePath)
 	if err != nil {
@@ -63,7 +63,6 @@ func CurrentConfig() *string { return (*string)(atomic.LoadPointer(&config)) }
 // UpdateConfig atomically swaps the current configuration
 func UpdateConfig(cfg *string) { atomic.StorePointer(&config, unsafe.Pointer(cfg)) }
 
-
 // SetRemoteProvider t is type, currently unused, addr is consul address, keyPref is our configuration key
 // (typically servicename/config, a la encrypt/config, guid/config, etc.)
 func SetRemoteProvider(t string, addr string, keyPref string) {
@@ -73,12 +72,12 @@ func SetRemoteProvider(t string, addr string, keyPref string) {
 
 // ReadRemoteConfig reads our remote config
 func ReadRemoteConfig() error {
-        client, err := api.NewClient(&api.Config{Address: consulAddr})
+	client, err := api.NewClient(&api.Config{Address: consulAddr})
 	if err != nil {
 		return err
 	}
 
-	data, err := consulGet( client, consulKey )
+	data, err := consulGet(client, consulKey)
 	if err != nil {
 		return err
 	}
@@ -87,10 +86,10 @@ func ReadRemoteConfig() error {
 }
 
 func GetStringSlice(k string) []string {
-	f := gjson.Get( *CurrentConfig(), k )
+	f := gjson.Get(*CurrentConfig(), k)
 
 	fArray := f.Array()
-	strSlice := make([]string, len ( fArray ) )
+	strSlice := make([]string, len(fArray))
 	for i, v := range fArray {
 		strSlice[i] = v.String()
 	}
@@ -99,22 +98,21 @@ func GetStringSlice(k string) []string {
 }
 
 func GetString(k string) string {
-	s := gjson.Get( *CurrentConfig(), k )
+	s := gjson.Get(*CurrentConfig(), k)
 	return s.String()
 }
 
 func GetBool(k string) bool {
-	b := gjson.Get( *CurrentConfig(), k )
+	b := gjson.Get(*CurrentConfig(), k)
 	return b.Bool()
 }
 
 func GetInt(k string) int {
-	b := gjson.Get( *CurrentConfig(), k )
+	b := gjson.Get(*CurrentConfig(), k)
 	return int(b.Int())
 }
 
 func GetInt64(k string) int64 {
-	b := gjson.Get( *CurrentConfig(), k )
+	b := gjson.Get(*CurrentConfig(), k)
 	return b.Int()
 }
-
