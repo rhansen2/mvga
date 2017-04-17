@@ -84,7 +84,7 @@ func consulGet(c *api.Client, k string) (string, error) {
 	// This can happen if consul goes away and then comes back with an
 	// non-existing key
 	if v == nil {
-		return "", errors.New("v was nil")
+		return "", errors.New("consul value was non-existent")
 	}
 	return string(v.Value), nil
 }
