@@ -18,7 +18,6 @@ import (
 var ErrNilReadFromConsul = errors.New("nil was read")
 
 // Global internal variables
-//var mtx sync.Mutex
 var cfgType string
 var cfgFilePath string
 var cfgContents *string
@@ -26,16 +25,9 @@ var cfgContents *string
 var consulAddr string
 var consulKey string
 
-// Setup mutex
-func init() {
-	//mtx = sync.Mutex{}
-}
-
 // SetConfigType only accepts JSON for the time being, this is mostly a placeholder method
 func SetConfigType(t string) {
-	//mtx.Lock()
 	cfgType = t
-	//mtx.Unlock()
 }
 
 func SetConfigFile(f string) {

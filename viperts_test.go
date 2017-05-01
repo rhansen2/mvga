@@ -31,7 +31,7 @@ func stringTest(t *testing.T) {
 
 func stringSliceTest(t *testing.T) {
 	val := GetStringSlice("test_string_slice")
-	t.Logf("%v", val)
+	//t.Logf("%v", val)
 	if val[0] != "foo" {
 		t.Fatalf("expected foobar, got %s", val[0])
 	}
