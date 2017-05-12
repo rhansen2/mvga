@@ -2,6 +2,7 @@ package viper
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -70,6 +71,62 @@ func TestInvalidJSON(t *testing.T) {
 	}
 }
 
+type testJSON struct {
+	TestBool        bool     `json:"test_bool"`
+	TestInt         int      `json:"test_int"`
+	TestString      string   `json:"test_string"`
+	TestStringSlice []string `json:"test_string_slice"`
+}
+
+var comp = testJSON{
+	TestBool:        false,
+	TestInt:         5,
+	TestString:      "zaphod",
+	TestStringSlice: []string{"foo", "bar", "quux"},
+}
+
+func TestUnmarshal(t *testing.T) {
+	SetConfigFile("test.json")
+	err := ReadInConfig()
+	if err != nil {
+		t.Fatalf("problem with ReadInConfig for viper json %s", err)
+	}
+	var tj testJSON
+	if err := UnmarshalPath("", &tj); err != nil {
+		t.Fatalf("UnmarshalPath() failed, got[%v] expected[nil]", err)
+	}
+	if !reflect.DeepEqual(tj, comp) {
+		t.Fatalf("UnmarshalPath() failed, got[%v] expected[%v]", tj, comp)
+	}
+}
+
+func TestUnmarshalSubPath(t *testing.T) {
+	SetConfigFile("test.json")
+	err := ReadInConfig()
+	if err != nil {
+		t.Fatalf("problem with ReadInConfig for viper json %s", err)
+	}
+	var obj []string
+	if err := UnmarshalPath("test_string_slice", &obj); err != nil {
+		t.Fatalf("UnmarshalPathSubPath() failed, got[%v] expected[nil]", err)
+	}
+	if !reflect.DeepEqual(obj, comp.TestStringSlice) {
+		t.Fatalf("UnmarshalPathSubPath() failed, got[%v] expected[%v]", obj, comp.TestStringSlice)
+	}
+}
+
+func TestUnmarshalSubPathBadPath(t *testing.T) {
+	SetConfigFile("test.json")
+	err := ReadInConfig()
+	if err != nil {
+		t.Fatalf("problem with ReadInConfig for viper json %s", err)
+	}
+	var obj []string
+	if err := UnmarshalPath("bad_path", &obj); err != ErrPathNotFound {
+		t.Fatalf("UnmarshalPathSubPathBadPath() failed, got[%v] expected[%v]", err, ErrPathNotFound)
+	}
+}
+
 func TestConsulConfig(t *testing.T) {
 	SetConfigType("json") // basically unused now
 	SetRemoteProvider("consul", "127.0.0.1:8500", "test/config")
@@ -116,7 +173,6 @@ func TestConsulConfigInvalidJSON(t *testing.T) {
 		for {
 			select {
 			case err := <-watcherChan:
-				fmt.Println("here")
 				if err != nil {
 					return
 				}

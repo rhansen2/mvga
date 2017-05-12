@@ -113,3 +113,21 @@ func GetInt64(k string) int64 {
 	b := gjson.Get(*CurrentConfig(), k)
 	return b.Int()
 }
+
+var (
+	// ErrPathNotFound is returned when an UnmarshalPath call is made to a path
+	// that does not exist
+	ErrPathNotFound = errors.New("path not found")
+)
+
+// UnmarshalPath attempts to unmarshal the json at path into v
+func UnmarshalPath(path string, v interface{}) error {
+	if path == "" {
+		return gjson.Unmarshal([]byte(*CurrentConfig()), v)
+	}
+	res := gjson.Get(*CurrentConfig(), path)
+	if !res.Exists() {
+		return ErrPathNotFound
+	}
+	return gjson.Unmarshal([]byte(res.Raw), v)
+}
