@@ -5,10 +5,11 @@ package viper
 
 import (
 	"errors"
-	"github.com/hashicorp/consul/api"
-	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"os"
+
+	"github.com/hashicorp/consul/api"
+	"github.com/tidwall/gjson"
 
 	"sync/atomic"
 	"unsafe"
@@ -44,8 +45,7 @@ func ReadInConfig() error {
 		return err
 	}
 	tmpByteVal := string(byteVal)
-	UpdateConfig(&tmpByteVal)
-	return nil
+	return UpdateConfig(&tmpByteVal)
 }
 
 var config unsafe.Pointer // actual type is *string
@@ -53,8 +53,14 @@ var config unsafe.Pointer // actual type is *string
 // CurrentConfig atomically returns the current configuration
 func CurrentConfig() *string { return (*string)(atomic.LoadPointer(&config)) }
 
-// UpdateConfig atomically swaps the current configuration
-func UpdateConfig(cfg *string) { atomic.StorePointer(&config, unsafe.Pointer(cfg)) }
+// UpdateConfig atomically swaps the current configuration, returns an error if the new config is not valid json
+func UpdateConfig(cfg *string) error {
+	if !gjson.Valid(*cfg) {
+		return errors.New("config is not valid json")
+	}
+	atomic.StorePointer(&config, unsafe.Pointer(cfg))
+	return nil
+}
 
 // SetRemoteProvider t is type, currently unused, addr is consul address, keyPref is our configuration key
 func SetRemoteProvider(t string, addr string, keyPref string) {
@@ -73,8 +79,7 @@ func ReadRemoteConfig() error {
 	if err != nil {
 		return err
 	}
-	UpdateConfig(&data)
-	return nil
+	return UpdateConfig(&data)
 }
 
 func GetStringSlice(k string) []string {

@@ -2,6 +2,7 @@ package viper
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 )
@@ -61,6 +62,14 @@ func TestJSONConfig(t *testing.T) {
 	assertData(t)
 }
 
+func TestInvalidJSON(t *testing.T) {
+	SetConfigFile("invalid_json.json")
+	err := ReadInConfig()
+	if err == nil {
+		t.Fatalf("ReadInConfig() failed expected[config is not valid json] got[%v]", err)
+	}
+}
+
 func TestConsulConfig(t *testing.T) {
 	SetConfigType("json") // basically unused now
 	SetRemoteProvider("consul", "127.0.0.1:8500", "test/config")
@@ -88,5 +97,37 @@ func TestConsulConfig(t *testing.T) {
 		}
 	}()
 
+	// Test rest of reader methods here
+}
+
+// NOTE: for this test to pass, you must load invalid json into the correct path
+func TestConsulConfigInvalidJSON(t *testing.T) {
+	SetConfigType("json") // basically unused now
+	SetRemoteProvider("consul", "127.0.0.1:8500", "test/config")
+	// Test watcher
+	watcherChan, err := StartWatcher("127.0.0.1:8500", "test/config", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case err := <-watcherChan:
+				fmt.Println("here")
+				if err != nil {
+					return
+				}
+				t.Fatal("TestConsulConfigInvalidJSON failed, expected error[config is not valid json]")
+				return
+			case <-time.After(time.Second * 4):
+				t.Fatal("TestConsulConfigInvalidJSON failed, did no process any configs from consul")
+				return
+			}
+		}
+	}()
+	wg.Wait()
 	// Test rest of reader methods here
 }
